@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AirTree Power Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #3a5c2e;
+    --green-mid: #5a7a4a;
+    --green-light: #8aaa6a;
+    --green-pale: #c8ddb8;
+    --green-bg: #e8f0e0;
+    --yellow-accent: #c8b84a;
+    --cream: #f4f0e8;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--green-bg);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-image: 
+      radial-gradient(ellipse at 10% 20%, rgba(90,122,74,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(58,92,46,0.12) 0%, transparent 50%);
+  }
+
+  .card {
+    background: var(--cream);
+    border-radius: 24px;
+    max-width: 700px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(58,92,46,0.2), 0 4px 16px rgba(58,92,46,0.1);
+  }
+
+  .header {
+    background: var(--green-dark);
+    padding: 36px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: 60px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(200,184,74,0.08);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+
+  .tree-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 2px 8px rgba(200,184,74,0.4));
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--cream);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    color: var(--green-pale);
+    font-size: 13px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    margin-left: 46px;
+    opacity: 0.85;
+  }
+
+  .body {
+    padding: 36px 40px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--green-mid);
+    margin-bottom: 18px;
+  }
+
+  .sliders-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .slider-group {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1.5px solid var(--green-pale);
+    transition: border-color 0.2s;
+  }
+  .slider-group:hover { border-color: var(--green-light); }
+
+  .slider-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+
+  .slider-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green-dark);
+  }
+
+  .slider-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green-dark);
+  }
+
+  .slider-unit {
+    font-size: 11px;
+    color: var(--green-mid);
+    font-weight: 400;
+    margin-left: 3px;
+  }
+
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--green-pale);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--green-dark);
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(58,92,46,0.35);
+    transition: transform 0.15s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .range-labels span {
+    font-size: 10px;
+    color: var(--green-light);
+  }
+
+  /* units selector */
+  .units-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+
+  .units-label {
+    font-size: 12px;
+    color: var(--green-mid);
+    font-weight: 500;
+  }
+
+  .unit-btn {
+    background: white;
+    border: 1.5px solid var(--green-pale);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 12px;
+    color: var(--green-mid);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.18s;
+  }
+  .unit-btn.active {
+    background: var(--green-dark);
+    border-color: var(--green-dark);
+    color: white;
+  }
+
+  /* results */
+  .results {
+    background: var(--green-dark);
+    border-radius: 18px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .results::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(200,184,74,0.06);
+  }
+
+  .results-title {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--green-pale);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .result-box {
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 16px 14px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: background 0.3s;
+  }
+
+  .result-box.highlight {
+    background: rgba(200,184,74,0.15);
+    border-color: rgba(200,184,74,0.3);
+  }
+
+  .result-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: white;
+    display: block;
+    line-height: 1;
+    margin-bottom: 4px;
+    transition: all 0.3s;
+  }
+
+  .result-box.highlight .result-num {
+    color: var(--yellow-accent);
+    font-size: 30px;
+  }
+
+  .result-label {
+    font-size: 10px;
+    color: var(--green-pale);
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+  }
+
+  .use-bar {
+    background: rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .use-icon { font-size: 18px; }
+
+  .use-text {
+    font-size: 12px;
+    color: var(--green-pale);
+    line-height: 1.5;
+  }
+
+  .use-text strong {
+    color: white;
+    font-weight: 500;
+  }
+
+  /* formula note */
+  .formula-note {
+    margin-top: 24px;
+    padding: 14px 18px;
+    background: white;
+    border-radius: 12px;
+    border-left: 3px solid var(--green-light);
+    font-size: 11px;
+    color: var(--green-mid);
+    line-height: 1.7;
+    font-family: monospace;
+  }
+
+  .formula-note strong {
+    color: var(--green-dark);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .live-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #6dcc6d;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="header-top">
+      <span class="tree-icon">🌳</span>
+      <h1>AirTree Power Calculator</h1>
+    </div>
+    <div class="subtitle">Hybrid Solar–Wind Output Estimator · UOB Energy Engineering</div>
+  </div>
+
+  <div class="body">
+    <div class="section-label"><span class="live-dot"></span>Adjust Parameters</div>
+
+    <div class="sliders-grid">
+      <div class="slider-group">
+        <div class="slider-top">
+          <span class="slider-name">💨 Wind Speed</span>
+          <span><span class="slider-val" id="windVal">4</span><span class="slider-unit">m/s</span></span>
+        </div>
+        <input type="range" id="windSlider" min="1" max="12" step="0.5" value="4" oninput="update()">
+        <div class="range-labels"><span>1 m/s</span><span>12 m/s</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-top">
+          <span class="slider-name">☀️ Solar Irradiance</span>
+          <span><span class="slider-val" id="solarVal">600</span><span class="slider-unit">W/m²</span></span>
+        </div>
+        <input type="range" id="solarSlider" min="0" max="1000" step="50" value="600" oninput="update()">
+        <div class="range-labels"><span>Night</span><span>Peak Sun</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-top">
+          <span class="slider-name">🌀 No. of Turbines (VAWT)</span>
+          <span><span class="slider-val" id="turbinesVal">4</span><span class="slider-unit">units</span></span>
+        </div>
+        <input type="range" id="turbinesSlider" min="1" max="8" step="1" value="4" oninput="update()">
+        <div class="range-labels"><span>1</span><span>8</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-top">
+          <span class="slider-name">🍃 No. of Solar Petals</span>
+          <span><span class="slider-val" id="petalsVal">4</span><span class="slider-unit">petals</span></span>
+        </div>
+        <input type="range" id="petalsSlider" min="1" max="8" step="1" value="4" oninput="update()">
+        <div class="range-labels"><span>1</span><span>8</span></div>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="results-title">Estimated Output</div>
+      <div class="results-grid">
+        <div class="result-box">
+          <span class="result-num" id="windPower">3.3</span>
+          <div class="result-label">Wind Power<br>total (W)</div>
+        </div>
+        <div class="result-box">
+          <span class="result-num" id="solarPower">10.0</span>
+          <div class="result-label">Solar Power<br>total (W)</div>
+        </div>
+        <div class="result-box highlight">
+          <span class="result-num" id="totalPower">79.8</span>
+          <div class="result-label">Total Output<br>(W)</div>
+        </div>
+      </div>
+
+      <div class="use-bar">
+        <span class="use-icon">💡</span>
+        <div class="use-text" id="useText">
+          <strong>Enough to power: ~6 LED streetlights</strong>
+          or charge ~3 laptops simultaneously
+        </div>
+      </div>
+    </div>
+
+    <div class="formula-note">
+      <strong>📐 Formulas used:</strong>
+      P_wind = ½ · ρ · A · V³ · Cp · η_gen × No. Turbines &nbsp;|&nbsp; ρ=1.225 kg/m³, A=0.56 m², Cp=0.2, η=0.75<br>
+      P_solar = Irradiance × A_petal × η_solar × No. Petals &nbsp;|&nbsp; A_petal=0.05 m², η_solar=0.18<br>
+      P_total = P_wind + P_solar (single tree)
+    </div>
+  </div>
+</div>
+
+<script>
+  function update() {
+    const wind = parseFloat(document.getElementById('windSlider').value);
+    const solar = parseFloat(document.getElementById('solarSlider').value);
+    const turbines = parseInt(document.getElementById('turbinesSlider').value);
+    const petals = parseInt(document.getElementById('petalsSlider').value);
+
+    document.getElementById('windVal').textContent = wind;
+    document.getElementById('solarVal').textContent = solar;
+    document.getElementById('turbinesVal').textContent = turbines;
+    document.getElementById('petalsVal').textContent = petals;
+
+    // Wind power: per turbine × number of turbines
+    const rho = 1.225, A = 0.56, Cp = 0.2, eta = 0.75;
+    const p_wind_one = 0.5 * rho * A * Math.pow(wind, 3) * Cp * eta;
+    const p_wind_total = p_wind_one * turbines;
+
+    // Solar power: per petal × number of petals
+    const A_petal = 0.05, eta_solar = 0.18;
+    const p_solar_one = solar * A_petal * eta_solar;
+    const p_solar_total = p_solar_one * petals;
+
+    const p_total = p_wind_total + p_solar_total;
+
+    document.getElementById('windPower').textContent = p_wind_total.toFixed(1);
+    document.getElementById('solarPower').textContent = p_solar_total.toFixed(1);
+    document.getElementById('totalPower').textContent = p_total.toFixed(1);
+
+    // Usage hint
+    let hint = '';
+    if (p_total < 20) hint = `<strong>Enough to power: ${Math.max(1, Math.floor(p_total/5))} LED streetlight(s)</strong><br>or charge a phone (~${Math.max(1,Math.floor(p_total/5))} simultaneously)`;
+    else if (p_total < 100) hint = `<strong>Enough to power: ~${Math.floor(p_total/12)} LED streetlights</strong><br>or charge ~${Math.floor(p_total/30)} laptops simultaneously`;
+    else if (p_total < 500) hint = `<strong>Enough to power: ~${Math.floor(p_total/12)} LED streetlights</strong><br>or run a small Wi-Fi router + charging station`;
+    else hint = `<strong>High output: ~${Math.floor(p_total/12)} LED streetlights</strong><br>suitable for a full campus charging hub`;
+
+    document.getElementById('useText').innerHTML = hint;
+  }
+
+  update();
+</script>
+</body>
+</html>
